@@ -38,13 +38,13 @@ public class TallerController {
     // Crear taller
     @PostMapping
     public Taller create(@RequestBody Taller taller, Principal principal) {
-        Usuario currentUsuario = usuarioService.findByNombre(principal.getName())
+        Usuario currentUsuario = usuarioService.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // Ejemplo de control de permisos por tipo de usuario
-        if (!(currentUsuario instanceof com.sga.model.Tallerista || 
-              currentUsuario instanceof com.sga.model.Supervisor || 
-              currentUsuario instanceof com.sga.model.Administrador)) {
+        // Control de permisos por rol
+        if (!currentUsuario.getRol().equals("ROLE_TALLERISTA") &&
+            !currentUsuario.getRol().equals("ROLE_ADMINISTRADOR") &&
+            !currentUsuario.getRol().equals("ROLE_SUPERVISOR")) {
             throw new RuntimeException("No tienes permisos para crear talleres");
         }
 
@@ -54,12 +54,12 @@ public class TallerController {
     // Actualizar taller
     @PutMapping("/{id}")
     public Taller update(@PathVariable Long id, @RequestBody Taller taller, Principal principal) {
-        Usuario currentUsuario = usuarioService.findByNombre(principal.getName())
+        Usuario currentUsuario = usuarioService.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!(currentUsuario instanceof com.sga.model.Tallerista || 
-              currentUsuario instanceof com.sga.model.Supervisor || 
-              currentUsuario instanceof com.sga.model.Administrador)) {
+        if (!currentUsuario.getRol().equals("ROLE_TALLERISTA") &&
+            !currentUsuario.getRol().equals("ROLE_ADMINISTRADOR") &&
+            !currentUsuario.getRol().equals("ROLE_SUPERVISOR")) {
             throw new RuntimeException("No tienes permisos para actualizar talleres");
         }
 
@@ -69,12 +69,12 @@ public class TallerController {
     // Eliminar taller
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id, Principal principal) {
-        Usuario currentUsuario = usuarioService.findByNombre(principal.getName())
+        Usuario currentUsuario = usuarioService.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!(currentUsuario instanceof com.sga.model.Tallerista || 
-              currentUsuario instanceof com.sga.model.Supervisor || 
-              currentUsuario instanceof com.sga.model.Administrador)) {
+        if (!currentUsuario.getRol().equals("ROLE_TALLERISTA") &&
+            !currentUsuario.getRol().equals("ROLE_ADMINISTRADOR") &&
+            !currentUsuario.getRol().equals("ROLE_SUPERVISOR")) {
             throw new RuntimeException("No tienes permisos para eliminar talleres");
         }
 
