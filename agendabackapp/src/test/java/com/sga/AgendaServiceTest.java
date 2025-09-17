@@ -1,0 +1,87 @@
+package com.sga;
+
+import com.sga.model.*;
+import com.sga.repository.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class AgendaServiceTest {
+
+    @Mock
+    private AgendaRepository agendaRepository;
+
+    @Mock
+    private TallerRepository tallerRepository;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @InjectMocks
+    private AgendaService agendaService;
+
+    private Tallerista tallerista;
+    private Taller taller;
+    private Agenda agenda;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        // Creamos datos de prueba
+        tallerista = new Tallerista();
+        tallerista.setId(1L);
+        tallerista.setNombre("Juan");
+        tallerista.setPassword("123");
+
+        taller = new Taller();
+        taller.setId(1L);
+        taller.setNombre("Taller de Arte");
+
+        agenda = new Agenda();
+        agenda.setId(1L);
+        agenda.setTaller(taller);
+        agenda.setFecha(LocalDate.now());
+        agenda.setHora(LocalTime.of(10,0));
+    }
+
+    @Test
+    void createAgenda_asTallerista_setsResponsableAndSaves() {
+        // Mockeamos repositorios
+        when(usuarioRepository.findById(tallerista.getId())).thenReturn(Optional.of(tallerista));
+        when(tallerRepository.findById(taller.getId())).thenReturn(Optional.of(taller));
+        when(agendaRepository.save(any(Agenda.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        Agenda result = agendaService.createAgenda(agenda, tallerista);
+
+        assertNotNull(result);
+        assertEquals(tallerista, result.getResponsable());
+        verify(agendaRepository, times(1)).save(result);
+    }
+
+    @Test
+    void createAgenda_userNotFound_throwsException() {
+        when(usuarioRepository.findById(tallerista.getId())).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> agendaService.createAgenda(agenda, tallerista));
+        assertEquals("Usuario no encontrado", ex.getMessage());
+    }
+
+    @Test
+    void createAgenda_tallerNotFound_throwsException() {
+        when(usuarioRepository.findById(tallerista.getId())).thenReturn(Optional.of(tallerista));
+        when(tallerRepository.findById(taller.getId())).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> agendaService.createAgenda(agenda, tallerista));
+        assertEquals("Taller no encontrado", ex.getMessage());
+    }
+}
