@@ -22,7 +22,7 @@ public class DataLoader {
                 admin.setNombre("Administrador");
                 admin.setEmail("admin@sga.com");
                 admin.setPassword(encoder.encode("admin123"));
-                admin.setRol("ROLE_ADMIN");
+                admin.setRol("ROLE_ADMINISTRADOR");
                 usuarioRepo.save(admin);
             }
 

@@ -2,10 +2,12 @@ package com.sga.config;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -20,35 +22,30 @@ public class JwtUtils {
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-    /**
-     * Genera la clave de firma asegurando que tenga al menos 256 bits.
-     */
-    private Key getSigningKey() {
+    // Genera la clave de firma
+    public Key getSigningKey() {
         byte[] keyBytes = jwtSecret.getBytes();
-        if (keyBytes.length < 32) { // 32 bytes = 256 bits
+        if (keyBytes.length < 32) {
             throw new WeakKeyException("JWT secret must be at least 32 bytes (256 bits).");
         }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    /**
-     * Genera un token JWT para el usuario especificado.
-     */
-    public String generateToken(String username) {
+    // Genera token con username + roles
+    public String generateToken(String username, List<String> roles) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    /**
-     * Extrae el username desde un token JWT válido.
-     */
+    // Extrae username del token
     public String getUserNameFromJwt(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -58,9 +55,18 @@ public class JwtUtils {
                 .getSubject();
     }
 
-    /**
-     * Valida un token JWT.
-     */
+    // Extrae roles del token
+    @SuppressWarnings("unchecked")
+    public List<String> getRolesFromJwt(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return (List<String>) claims.get("roles");
+    }
+
+    // Valida token
     public boolean validateJwtToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -69,7 +75,6 @@ public class JwtUtils {
                 .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            // Podés loggear el error para debug
             System.err.println("JWT inválido: " + e.getMessage());
             return false;
         }

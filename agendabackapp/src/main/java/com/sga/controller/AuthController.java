@@ -1,5 +1,8 @@
 package com.sga.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,18 +38,21 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
             );
 
-            // Obtenemos el usuario autenticado
             org.springframework.security.core.userdetails.User userSpring =
                     (org.springframework.security.core.userdetails.User) auth.getPrincipal();
 
-            // Generamos token JWT
-            String jwt = jwtUtils.generateToken(userSpring.getUsername());
+            // Obtenemos roles como lista de strings
+            List<String> roles = userSpring.getAuthorities()
+                    .stream()
+                    .map(a -> a.getAuthority())
+                    .collect(Collectors.toList());
 
-            // Retornamos token con tipo Bearer
+            // Generamos token incluyendo roles
+            String jwt = jwtUtils.generateToken(userSpring.getUsername(), roles);
+
             return ResponseEntity.ok(new JwtResponse(jwt, "Bearer"));
 
         } catch (AuthenticationException ex) {
-            // Retornamos error de autenticación con mensaje estandarizado
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(new ErrorResponse("Credenciales inválidas"));
