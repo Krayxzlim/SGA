@@ -1,6 +1,13 @@
 package com.sga.model;
 
-import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +18,8 @@ public class Agenda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fecha;
-    private String hora;
+    private LocalDate fecha;
+    private LocalTime hora;
 
     @ManyToOne
     private Taller taller;
