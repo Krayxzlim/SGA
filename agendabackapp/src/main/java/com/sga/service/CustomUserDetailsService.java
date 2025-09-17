@@ -27,9 +27,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        // Mapear rol según subclase
-        String role = usuario.getClass().getSimpleName().toUpperCase(); // ADMINISTRADOR, SUPERVISOR, TALLERISTA
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        // Usar directamente el campo 'rol' del usuario
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(usuario.getRol()));
 
         return new User(usuario.getEmail(), usuario.getPassword(), authorities);
     }
