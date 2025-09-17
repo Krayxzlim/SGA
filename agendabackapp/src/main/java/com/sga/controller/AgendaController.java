@@ -18,7 +18,7 @@ import com.sga.service.AgendaService;
 import com.sga.service.UsuarioService;
 
 @RestController
-@RequestMapping("/api/Agendas")
+@RequestMapping("/api/agendas")
 public class AgendaController {
 
     private final AgendaService agendaService;
