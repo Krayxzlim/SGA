@@ -1,6 +1,5 @@
 package com.sga.controller;
 
-import java.security.Principal;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sga.model.Agenda;
-import com.sga.model.Usuario;
 import com.sga.service.AgendaService;
 import com.sga.service.UsuarioService;
 
@@ -35,27 +33,19 @@ public class AgendaController {
         return agendaService.getAllAgendas(); // ⚡ usar instancia, no la clase
     }
 
-    // Crear agendamiento
     @PostMapping
-    public Agenda create(@RequestBody Agenda agenda, Principal principal) {
-        Usuario currentUsuario = usuarioService.findByNombre(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return agendaService.createAgenda(agenda, currentUsuario);
+    public Agenda create(@RequestBody Agenda agenda) {
+        return agendaService.createAgenda(agenda);
     }
 
-    // Actualizar agendamiento
     @PutMapping("/{id}")
-    public Agenda update(@PathVariable Long id, @RequestBody Agenda agenda, Principal principal) {
-        Usuario currentUsuario = usuarioService.findByNombre(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return agendaService.updateAgenda(id, agenda, currentUsuario);
+    public Agenda update(@PathVariable Long id, @RequestBody Agenda agenda) {
+        return agendaService.updateAgenda(id, agenda);
     }
 
-    // Eliminar agendamiento
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id, Principal principal) {
-        Usuario currentUsuario = usuarioService.findByNombre(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        agendaService.deleteAgenda(id, currentUsuario);
+    public void delete(@PathVariable Long id) {
+        agendaService.deleteAgenda(id);
     }
+
 }
