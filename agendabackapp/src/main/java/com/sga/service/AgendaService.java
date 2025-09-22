@@ -14,6 +14,8 @@ public class AgendaService {
 
     private final AgendaRepository agendaRepository;
     private final TallerRepository tallerRepository;
+    private final UsuarioRepository usuarioRepository;
+
 
     public AgendaService(AgendaRepository agendaRepository, TallerRepository tallerRepository, UsuarioRepository usuarioRepository) {
         this.agendaRepository = agendaRepository;
