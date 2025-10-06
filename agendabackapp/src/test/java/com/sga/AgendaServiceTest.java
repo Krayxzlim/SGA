@@ -65,7 +65,7 @@ class AgendaServiceTest {
     }
 
     @Test
-    void createAgenda_asTallerista_setsResponsableAndSaves() {
+    void createAgenda_asTallerista_setsTalleristaAndSaves() {
         // Mockeamos repositorios
         when(usuarioRepository.findById(tallerista.getId())).thenReturn(Optional.of(tallerista));
         when(tallerRepository.findById(taller.getId())).thenReturn(Optional.of(taller));
@@ -74,7 +74,7 @@ class AgendaServiceTest {
         Agenda result = agendaService.createAgenda(agenda);
 
         assertNotNull(result);
-        assertEquals(tallerista, result.getResponsable());
+        assertEquals(tallerista, result.getTallerista());
         verify(agendaRepository, times(1)).save(result);
     }
 

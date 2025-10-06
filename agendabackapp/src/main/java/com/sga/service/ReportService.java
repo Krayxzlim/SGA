@@ -57,7 +57,7 @@ public class ReportService {
                     s.getTaller() != null ? s.getTaller().getNombre() : ""
                 );
                 row.createCell(4).setCellValue(
-                    s.getResponsable() != null ? s.getResponsable().getNombre() : ""
+                    s.getTallerista() != null ? s.getTallerista().getNombre() : ""
                 );
             }
 

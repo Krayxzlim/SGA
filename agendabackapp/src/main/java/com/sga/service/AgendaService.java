@@ -41,7 +41,7 @@ public class AgendaService {
             s.setFecha(updated.getFecha());
             s.setHora(updated.getHora());
             s.setTaller(updated.getTaller());
-            s.setResponsable(updated.getResponsable());
+            s.setTallerista(updated.getTallerista());
             return agendaRepository.save(s);
         }).orElseThrow(() -> new RuntimeException("Agendamiento no encontrado"));
     }
