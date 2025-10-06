@@ -25,6 +25,6 @@ public class Agenda {
     private Taller taller;
 
     @ManyToOne
-    private Tallerista tallerista;
+    private Usuario  tallerista;
 }
 

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sga.model.Agenda;
+import com.sga.model.Taller;
+import com.sga.model.Usuario;
 import com.sga.repository.AgendaRepository;
 import com.sga.repository.TallerRepository;
 import com.sga.repository.UsuarioRepository;
@@ -24,11 +26,24 @@ public class AgendaService {
     }
 
     public Agenda createAgenda(Agenda agenda) {
-        tallerRepository.findById(agenda.getTaller().getId())
+    if (agenda.getTallerista() == null) {
+        throw new RuntimeException("Usuario no encontrado");
+    }
+
+    Usuario usuario = usuarioRepository.findById(agenda.getTallerista().getId())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    agenda.setTallerista(usuario);
+
+    Taller taller = tallerRepository.findById(agenda.getTaller().getId())
             .orElseThrow(() -> new RuntimeException("Taller no encontrado"));
 
-        return agendaRepository.save(agenda);
+    agenda.setTaller(taller);
+
+    return agendaRepository.save(agenda);
     }
+
+
 
     // Listar agenda
     public List<Agenda> getAllAgendas() {

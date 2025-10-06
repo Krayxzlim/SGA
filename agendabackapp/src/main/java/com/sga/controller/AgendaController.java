@@ -30,7 +30,7 @@ public class AgendaController {
     // Listar todos
     @GetMapping
     public List<Agenda> list() {
-        return agendaService.getAllAgendas(); // ⚡ usar instancia, no la clase
+        return agendaService.getAllAgendas();
     }
 
     @PostMapping
