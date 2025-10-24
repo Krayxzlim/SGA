@@ -13,18 +13,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sga.model.Agenda;
 import com.sga.service.AgendaService;
-import com.sga.service.UsuarioService;
+import com.sga.service.ColegioService;
 
 @RestController
 @RequestMapping("/api/agendas")
 public class AgendaController {
 
     private final AgendaService agendaService;
-    private final UsuarioService usuarioService;
+    private final ColegioService colegioService;
 
-    public AgendaController(AgendaService agendaService, UsuarioService usuarioService) {
+    public AgendaController(AgendaService agendaService, ColegioService colegioService) {
         this.agendaService = agendaService;
-        this.usuarioService = usuarioService;
+        this.colegioService = colegioService;
     }
 
     // Listar todos

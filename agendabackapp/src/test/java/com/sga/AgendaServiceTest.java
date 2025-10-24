@@ -20,11 +20,11 @@ import static org.mockito.Mockito.when;
 import org.mockito.MockitoAnnotations;
 
 import com.sga.model.Agenda;
+import com.sga.model.Colegio;
 import com.sga.model.Taller;
-import com.sga.model.Tallerista;
 import com.sga.repository.AgendaRepository;
+import com.sga.repository.ColegioRepository;
 import com.sga.repository.TallerRepository;
-import com.sga.repository.UsuarioRepository;
 import com.sga.service.AgendaService;
 
 class AgendaServiceTest {
@@ -36,12 +36,12 @@ class AgendaServiceTest {
     private TallerRepository tallerRepository;
 
     @Mock
-    private UsuarioRepository usuarioRepository;
+    private ColegioRepository colegioRepository;
 
     @InjectMocks
     private AgendaService agendaService;
 
-    private Tallerista tallerista;
+    private Colegio colegio;
     private Taller taller;
     private Agenda agenda;
 
@@ -50,10 +50,9 @@ class AgendaServiceTest {
         MockitoAnnotations.openMocks(this);
 
         // Datos de prueba
-        tallerista = new Tallerista();
-        tallerista.setId(1L);
-        tallerista.setNombre("Juan");
-        tallerista.setPassword("123");
+        colegio = new Colegio();
+        colegio.setId(1L);
+        colegio.setNombre("Colegio San Martín");
 
         taller = new Taller();
         taller.setId(1L);
@@ -62,13 +61,14 @@ class AgendaServiceTest {
         agenda = new Agenda();
         agenda.setId(1L);
         agenda.setTaller(taller);
+        agenda.setColegio(colegio);
         agenda.setFecha(LocalDate.now());
         agenda.setHora(LocalTime.of(10, 0));
     }
 
     @Test
-    void createAgenda_asTallerista_setsTalleristaAndSaves() {
-        when(usuarioRepository.findById(tallerista.getId())).thenReturn(Optional.of(tallerista));
+    void createAgenda_setsColegioAndSaves() {
+        when(colegioRepository.findById(colegio.getId())).thenReturn(Optional.of(colegio));
         when(tallerRepository.findById(taller.getId())).thenReturn(Optional.of(taller));
         when(agendaRepository.save(any(Agenda.class))).thenAnswer(invocation -> {
             Agenda saved = invocation.getArgument(0);
@@ -76,32 +76,29 @@ class AgendaServiceTest {
             return saved;
         });
 
-        agenda.setTallerista(tallerista);
         Agenda result = agendaService.createAgenda(agenda);
 
         assertNotNull(result);
         assertEquals(99L, result.getId());
-        assertEquals(tallerista, result.getTallerista());
+        assertEquals(colegio, result.getColegio());
         assertEquals(taller, result.getTaller());
         verify(agendaRepository, times(1)).save(any(Agenda.class));
     }
 
     @Test
-    void createAgenda_userNotFound_throwsException() {
-        when(usuarioRepository.findById(anyLong())).thenReturn(Optional.empty());
+    void createAgenda_colegioNotFound_throwsException() {
+        when(colegioRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> agendaService.createAgenda(agenda));
 
-        assertEquals("Usuario no encontrado", exception.getMessage());
+        assertEquals("Colegio no encontrado", exception.getMessage());
         verify(agendaRepository, never()).save(any());
     }
 
     @Test
     void createAgenda_tallerNotFound_throwsException() {
-        agenda.setTallerista(tallerista);
-
-        when(usuarioRepository.findById(anyLong())).thenReturn(Optional.of(tallerista));
+        when(colegioRepository.findById(anyLong())).thenReturn(Optional.of(colegio));
         when(tallerRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,

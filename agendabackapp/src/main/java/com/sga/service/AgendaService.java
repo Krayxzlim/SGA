@@ -5,64 +5,57 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sga.model.Agenda;
+import com.sga.model.Colegio;
 import com.sga.model.Taller;
-import com.sga.model.Usuario;
 import com.sga.repository.AgendaRepository;
+import com.sga.repository.ColegioRepository;
 import com.sga.repository.TallerRepository;
-import com.sga.repository.UsuarioRepository;
 
 @Service
 public class AgendaService {
 
     private final AgendaRepository agendaRepository;
     private final TallerRepository tallerRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final ColegioRepository colegioRepository;
 
-
-    public AgendaService(AgendaRepository agendaRepository, TallerRepository tallerRepository, UsuarioRepository usuarioRepository) {
+    public AgendaService(AgendaRepository agendaRepository, TallerRepository tallerRepository, ColegioRepository colegioRepository) {
         this.agendaRepository = agendaRepository;
         this.tallerRepository = tallerRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.colegioRepository = colegioRepository;
     }
 
     public Agenda createAgenda(Agenda agenda) {
-    if (agenda.getTallerista() == null) {
-        throw new RuntimeException("Usuario no encontrado");
+        if (agenda.getColegio() == null) {
+            throw new RuntimeException("Colegio no encontrado");
+        }
+
+        Colegio colegio = colegioRepository.findById(agenda.getColegio().getId())
+                .orElseThrow(() -> new RuntimeException("Colegio no encontrado"));
+        agenda.setColegio(colegio);
+
+        Taller taller = tallerRepository.findById(agenda.getTaller().getId())
+                .orElseThrow(() -> new RuntimeException("Taller no encontrado"));
+        agenda.setTaller(taller);
+
+        return agendaRepository.save(agenda);
     }
 
-    Usuario usuario = usuarioRepository.findById(agenda.getTallerista().getId())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-    agenda.setTallerista(usuario);
-
-    Taller taller = tallerRepository.findById(agenda.getTaller().getId())
-            .orElseThrow(() -> new RuntimeException("Taller no encontrado"));
-
-    agenda.setTaller(taller);
-
-    return agendaRepository.save(agenda);
-    }
-
-
-
-    // Listar agenda
     public List<Agenda> getAllAgendas() {
         return agendaRepository.findAll();
     }
 
-    // Actualizar agendamiento
     public Agenda updateAgenda(Long id, Agenda updated) {
-        return agendaRepository.findById(id).map(s -> {
-            s.setFecha(updated.getFecha());
-            s.setHora(updated.getHora());
-            s.setTaller(updated.getTaller());
-            s.setTallerista(updated.getTallerista());
-            return agendaRepository.save(s);
+        return agendaRepository.findById(id).map(a -> {
+            a.setFecha(updated.getFecha());
+            a.setHora(updated.getHora());
+            a.setTaller(updated.getTaller());
+            a.setColegio(updated.getColegio());
+            return agendaRepository.save(a);
         }).orElseThrow(() -> new RuntimeException("Agendamiento no encontrado"));
     }
 
     public void deleteAgenda(Long id) {
-        Agenda s = agendaRepository.findById(id)
+        Agenda a = agendaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Agendamiento no encontrado"));
         agendaRepository.deleteById(id);
     }
