@@ -1,7 +1,13 @@
 package com.sga.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -16,5 +22,5 @@ public class AsignacionTallerista {
     private Agenda agenda;
 
     @ManyToOne
-    private Tallerista tallerista;
+    private Usuario tallerista;
 }

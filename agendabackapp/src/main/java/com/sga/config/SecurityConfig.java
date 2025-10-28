@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/talleres/**").hasAnyRole("TALLERISTA", "SUPERVISOR", "ADMINISTRADOR")
                 .requestMatchers("/api/colegios/**").hasAnyRole("TALLERISTA", "SUPERVISOR", "ADMINISTRADOR")
                 .requestMatchers("/api/agendas/**").hasAnyRole("TALLERISTA", "SUPERVISOR", "ADMINISTRADOR")
-
+                .requestMatchers("/api/asignaciones/**").hasAnyRole("TALLERISTA", "SUPERVISOR", "ADMINISTRADOR")
                 // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
             )

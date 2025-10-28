@@ -3,11 +3,13 @@ package com.sga.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sga.model.Agenda;
 import com.sga.model.Colegio;
 import com.sga.model.Taller;
 import com.sga.repository.AgendaRepository;
+import com.sga.repository.AsignacionTalleristaRepository;
 import com.sga.repository.ColegioRepository;
 import com.sga.repository.TallerRepository;
 
@@ -17,11 +19,13 @@ public class AgendaService {
     private final AgendaRepository agendaRepository;
     private final TallerRepository tallerRepository;
     private final ColegioRepository colegioRepository;
+    private final AsignacionTalleristaRepository asignacionTalleristaRepository;
 
-    public AgendaService(AgendaRepository agendaRepository, TallerRepository tallerRepository, ColegioRepository colegioRepository) {
+    public AgendaService(AgendaRepository agendaRepository, TallerRepository tallerRepository, ColegioRepository colegioRepository, AsignacionTalleristaRepository asignacionTalleristaRepository) {
         this.agendaRepository = agendaRepository;
         this.tallerRepository = tallerRepository;
         this.colegioRepository = colegioRepository;
+        this.asignacionTalleristaRepository = asignacionTalleristaRepository;
     }
 
     public Agenda createAgenda(Agenda agenda) {
@@ -54,9 +58,13 @@ public class AgendaService {
         }).orElseThrow(() -> new RuntimeException("Agendamiento no encontrado"));
     }
 
+    @Transactional
     public void deleteAgenda(Long id) {
-        Agenda a = agendaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Agendamiento no encontrado"));
+        // Primero borrar las asignaciones relacionadas
+        asignacionTalleristaRepository.deleteByAgendaId(id);
+
+        // Luego eliminar la agenda
         agendaRepository.deleteById(id);
     }
+
 }
