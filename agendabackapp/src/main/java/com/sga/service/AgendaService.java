@@ -1,10 +1,12 @@
 package com.sga.service;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sga.exception.HorarioSolapadoException;
 import com.sga.model.Agenda;
 import com.sga.model.Colegio;
 import com.sga.model.Taller;
@@ -21,7 +23,10 @@ public class AgendaService {
     private final ColegioRepository colegioRepository;
     private final AsignacionTalleristaRepository asignacionTalleristaRepository;
 
-    public AgendaService(AgendaRepository agendaRepository, TallerRepository tallerRepository, ColegioRepository colegioRepository, AsignacionTalleristaRepository asignacionTalleristaRepository) {
+    public AgendaService(AgendaRepository agendaRepository,
+                         TallerRepository tallerRepository,
+                         ColegioRepository colegioRepository,
+                         AsignacionTalleristaRepository asignacionTalleristaRepository) {
         this.agendaRepository = agendaRepository;
         this.tallerRepository = tallerRepository;
         this.colegioRepository = colegioRepository;
@@ -41,6 +46,8 @@ public class AgendaService {
                 .orElseThrow(() -> new RuntimeException("Taller no encontrado"));
         agenda.setTaller(taller);
 
+        validarSolapamiento(agenda);
+
         return agendaRepository.save(agenda);
     }
 
@@ -54,6 +61,9 @@ public class AgendaService {
             a.setHora(updated.getHora());
             a.setTaller(updated.getTaller());
             a.setColegio(updated.getColegio());
+
+            validarSolapamiento(a);
+
             return agendaRepository.save(a);
         }).orElseThrow(() -> new RuntimeException("Agendamiento no encontrado"));
     }
@@ -67,4 +77,34 @@ public class AgendaService {
         agendaRepository.deleteById(id);
     }
 
+    // ================= VALIDACIÓN DE SOLAPAMIENTO =================
+    private void validarSolapamiento(Agenda agendaNueva) {
+        LocalTime horaNueva = agendaNueva.getHora();
+        LocalTime finNueva = horaNueva.plusHours(1);
+
+        List<Agenda> agendasExistentes = agendaRepository.findAll();
+
+        for (Agenda otraAgenda : agendasExistentes) {
+            // Ignorar la misma agenda si es actualización
+            if (agendaNueva.getId() != null && agendaNueva.getId().equals(otraAgenda.getId())) {
+                continue;
+            }
+
+            // Comparar agendas del mismo día
+            if (otraAgenda.getFecha().equals(agendaNueva.getFecha())) {
+                LocalTime horaExistente = otraAgenda.getHora();
+                LocalTime finExistente = horaExistente.plusHours(1);
+
+                boolean solapan = !horaNueva.isAfter(finExistente) && !finNueva.isBefore(horaExistente);
+                if (solapan) {
+                    throw new HorarioSolapadoException(
+                        "El horario " + horaNueva + " - " + finNueva +
+                        " se solapa con el taller '" + otraAgenda.getTaller().getNombre() + 
+                        "' en el colegio '" + otraAgenda.getColegio().getNombre() + 
+                        "' (Horario existente: " + horaExistente + " - " + finExistente + ")"
+                    );
+                }
+            }
+        }
+    }
 }
